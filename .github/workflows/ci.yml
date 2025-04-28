@@ -30,3 +30,24 @@ jobs:
     - name: Run tests
       run: dotnet test src/BlazingPizza.sln --no-build --verbosity normal --collect:"XPlat Code Coverage"
 
+  deploy:
+        runs-on: ubuntu-latest
+        needs: build-and-test
+    
+        steps:
+        - name: Checkout code
+          uses: actions/checkout@v4
+    
+        - name: Setup .NET
+          uses: actions/setup-dotnet@v4
+          with:
+            dotnet-version: 7.0.x
+    
+        - name: Publish the Blazor app
+          run: dotnet publish src/BlazingPizza.Client/BlazingPizza.Client.csproj -c Release -o ./publish --nologo
+    
+        - name: Deploy to GitHub Pages
+          uses: peaceiris/actions-gh-pages@v3
+          with:
+            github_token: ${{ secrets.GITHUB_TOKEN }}
+            publish_dir: ./publish/wwwroot
